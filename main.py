@@ -1,25 +1,19 @@
-import requests
+import CheckCredits
+import Config
+import toCSV
 
-API_KEY = 'AIzaSyCzuFXynRJbBYAhOn0Arkxd27LHVK0Wy1M'
-CHANNEL_ID = 'UCcmLksNmHmp4gZmZCA1-DHA'
+CHANNEL_ID_LIST = ["UCiWatT8PZJkw7W8K8j6eGsA", "UCcmLksNmHmp4gZmZCA1-DHA", "UCYpT6g8KlLla4Nyzz6UUtkA",
+                   "UC3v9Y9VNDyVy1TMr0dUoaMQ", "UCySwejnZVKetHGKS9K5B_fg", "UCFrVi-E_Na2syIPK6e6Trbg",
+                   "UCfbTjeLbY49IrOPf3TiwMZQ", "UCA_NIJLe2dNnL4J8M3wrsig"]
 
-# Fetch playlist ID of uploads
-playlist_url = f"https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id={CHANNEL_ID}&key={API_KEY}"
-response = requests.get(playlist_url).json()
-upload_playlist_id = response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+if __name__ == "__main__":
+    print("Program Started")
+    for channel_id in CHANNEL_ID_LIST:
+        videos_list, channel_name = CheckCredits.checkVideos(CheckCredits.getResponse(
+            api_key=Config.API_KEY,
+            channel_id=channel_id
+        )
+        )
 
-# Fetch video descriptions
-video_list_url = f"https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId={upload_playlist_id}&maxResults=50&key={API_KEY}"
-videos = requests.get(video_list_url).json()
-
-for video in videos['items']:
-    description = video['snippet']['description']
-    title = video['snippet']['title']
-    video_id = video['snippet']['resourceId']['videoId']
-    video_url = f"https://www.youtube.com/watch?v={video_id}"
-    if "RPM" in description:
-        print(f"\nCREDIT FOUND in video: {title}\nLink: {video_url}")
-        print('_'*150)
-    else:
-        print(f"\nNO CREDIT FOUND in video: {title}\nLink: {video_url}")
-        print('_' * 150)
+        toCSV.convertToCSV(videos_list, channel_name)
+    print("Finished!!")
